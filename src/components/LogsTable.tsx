@@ -19,14 +19,15 @@ export const LogsTable = ({ logs }: LogsTableProps) => {
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <Table>
+      <div className="overflow-x-auto">
+        <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="font-semibold">Machine ID</TableHead>
-            <TableHead className="font-semibold">Event Type</TableHead>
-            <TableHead className="font-semibold">Timestamp</TableHead>
-            <TableHead className="font-semibold">Time Ago</TableHead>
-            <TableHead className="font-semibold">Details</TableHead>
+            <TableHead className="font-semibold whitespace-nowrap">Machine ID</TableHead>
+            <TableHead className="font-semibold whitespace-nowrap">Event Type</TableHead>
+            <TableHead className="font-semibold whitespace-nowrap">Timestamp</TableHead>
+            <TableHead className="font-semibold whitespace-nowrap">Time Ago</TableHead>
+            <TableHead className="font-semibold whitespace-nowrap">Details</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -61,6 +62,7 @@ export const LogsTable = ({ logs }: LogsTableProps) => {
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 };

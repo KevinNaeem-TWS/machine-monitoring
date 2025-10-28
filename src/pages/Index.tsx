@@ -23,36 +23,38 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Machine Monitoring
             </h1>
-            <p className="text-muted-foreground mt-2">SCADA System Dashboard</p>
+            <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">SCADA System Dashboard</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3">
             <Input
               placeholder="Machine ID"
               value={machineIdInput}
               onChange={(e) => setMachineIdInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleFilterMachine()}
-              className="w-40"
+              className="w-full sm:w-40"
             />
-            {selectedMachine ? (
-              <Button onClick={handleClearFilter} variant="secondary">
-                Clear Filter
+            <div className="flex gap-2">
+              {selectedMachine ? (
+                <Button onClick={handleClearFilter} variant="secondary" className="flex-1 sm:flex-none">
+                  Clear Filter
+                </Button>
+              ) : (
+                <Button onClick={handleFilterMachine} className="flex-1 sm:flex-none">
+                  Filter
+                </Button>
+              )}
+              <Button onClick={() => refetch()} variant="outline" className="flex-1 sm:flex-none">
+                Refresh
               </Button>
-            ) : (
-              <Button onClick={handleFilterMachine}>
-                Filter
-              </Button>
-            )}
-            <Button onClick={() => refetch()} variant="outline">
-              Refresh
-            </Button>
+            </div>
           </div>
         </div>
 
@@ -97,14 +99,16 @@ const Index = () => {
             </div>
 
             {/* Logs Table */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Event Logs</h2>
-                <p className="text-sm text-muted-foreground">
+            <div className="space-y-3 md:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h2 className="text-xl md:text-2xl font-bold">Event Logs</h2>
+                <p className="text-xs md:text-sm text-muted-foreground">
                   {selectedMachine ? `Showing logs for Machine ${selectedMachine}` : 'Showing all machines'}
                 </p>
               </div>
-              <LogsTable logs={logs} />
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <LogsTable logs={logs} />
+              </div>
             </div>
           </>
         )}
