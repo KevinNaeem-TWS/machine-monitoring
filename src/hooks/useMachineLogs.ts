@@ -35,57 +35,64 @@ export const calculateMetrics = (logs: MachineLog[]) => {
     return {
       runningTime: 0,
       idleTime: 0,
-      totalEvents: 0,
+      offTime: 0,
       uptime: 0,
     };
   }
 
   let runningTime = 0;
   let idleTime = 0;
-  let lastTimestamp: Date | null = null;
-  let lastState: string | null = null;
+  let offTime = 0;
 
   // Sort by timestamp ascending
   const sortedLogs = [...logs].sort((a, b) => 
     new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 
-  sortedLogs.forEach((log, index) => {
-    const currentTimestamp = new Date(log.timestamp);
+  // Process each log to find state transitions
+  for (let i = 0; i < sortedLogs.length - 1; i++) {
+    const currentLog = sortedLogs[i];
+    const nextLog = sortedLogs[i + 1];
     
-    if (lastTimestamp && lastState) {
-      const duration = currentTimestamp.getTime() - lastTimestamp.getTime();
-      
-      if (lastState.toLowerCase().includes('start') || lastState.toLowerCase().includes('running')) {
+    const currentTime = new Date(currentLog.timestamp).getTime();
+    const nextTime = new Date(nextLog.timestamp).getTime();
+    const duration = nextTime - currentTime;
+
+    const eventType = currentLog.event_type.toLowerCase();
+
+    // Running time: from running_start to machine_off or idle_start (only "Machine became idle.")
+    if (eventType === 'running_start') {
+      const nextEventType = nextLog.event_type.toLowerCase();
+      if (nextEventType === 'machine_off' || 
+          (nextEventType === 'idle_start' && nextLog.details === 'Machine became idle.')) {
         runningTime += duration;
-      } else if (lastState.toLowerCase().includes('stop') || lastState.toLowerCase().includes('idle')) {
+      }
+    }
+
+    // Idle time: from idle_start to running_start or machine_off
+    if (eventType === 'idle_start') {
+      const nextEventType = nextLog.event_type.toLowerCase();
+      if (nextEventType === 'running_start' || nextEventType === 'machine_off') {
         idleTime += duration;
       }
     }
-    
-    lastTimestamp = currentTimestamp;
-    lastState = log.event_type;
-  });
 
-  // If last state is running, add time until now
-  if (lastState && lastTimestamp) {
-    const now = new Date();
-    const duration = now.getTime() - lastTimestamp.getTime();
-    
-    if (lastState.toLowerCase().includes('start') || lastState.toLowerCase().includes('running')) {
-      runningTime += duration;
-    } else if (lastState.toLowerCase().includes('stop') || lastState.toLowerCase().includes('idle')) {
-      idleTime += duration;
+    // Off time: from machine_off to machine_on
+    if (eventType === 'machine_off') {
+      const nextEventType = nextLog.event_type.toLowerCase();
+      if (nextEventType === 'machine_on') {
+        offTime += duration;
+      }
     }
   }
 
-  const totalTime = runningTime + idleTime;
+  const totalTime = runningTime + idleTime + offTime;
   const uptime = totalTime > 0 ? (runningTime / totalTime) * 100 : 0;
 
   return {
     runningTime,
     idleTime,
-    totalEvents: logs.length,
+    offTime,
     uptime,
   };
 };
