@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LiveMachineState } from "@/types/database";
 import { Activity, FileText, Package } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface LiveMachineStatusProps {
   liveStates: LiveMachineState[];
@@ -12,8 +13,17 @@ export const LiveMachineStatus = ({ liveStates }: LiveMachineStatusProps) => {
     const statusLower = status.toLowerCase();
     if (statusLower.includes('running')) return 'default';
     if (statusLower.includes('idle')) return 'secondary';
-    if (statusLower.includes('off')) return 'destructive';
+    if (statusLower.includes('off') || statusLower.includes('disconnected')) return 'destructive';
     return 'outline';
+  };
+
+  const shouldShowSince = (status: string) => {
+    const statusLower = status.toLowerCase();
+    return statusLower.includes('running') || statusLower.includes('disconnected');
+  };
+
+  const getRelativeTime = (timestamp: string) => {
+    return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   };
 
   if (liveStates.length === 0) {
@@ -32,9 +42,16 @@ export const LiveMachineStatus = ({ liveStates }: LiveMachineStatusProps) => {
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
                 <h3 className="font-bold text-lg">Machine {machine.machine_id}</h3>
-                <Badge variant={getStatusVariant(machine.status)} className="text-xs">
-                  {machine.status}
-                </Badge>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant={getStatusVariant(machine.status)} className="text-xs">
+                    {machine.status}
+                  </Badge>
+                  {shouldShowSince(machine.status) && (
+                    <span className="text-xs text-muted-foreground">
+                      since {getRelativeTime(machine.updated_at)}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="p-2 rounded-lg bg-primary/10">
                 <Activity className="w-5 h-5 text-primary" />
@@ -60,7 +77,7 @@ export const LiveMachineStatus = ({ liveStates }: LiveMachineStatusProps) => {
 
               <div className="pt-2 border-t">
                 <p className="text-xs text-muted-foreground">
-                  Last updated: {new Date(machine.updated_at).toLocaleTimeString()}
+                  Last updated {getRelativeTime(machine.updated_at)}
                 </p>
               </div>
             </div>
