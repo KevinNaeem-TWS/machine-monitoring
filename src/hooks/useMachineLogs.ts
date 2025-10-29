@@ -18,7 +18,13 @@ export const useMachineLogs = (machineId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as MachineLog[];
+      
+      // Sort by timestamp descending (newest first) on client side to handle TEXT timestamps
+      const sortedData = (data as MachineLog[]).sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      
+      return sortedData;
     },
     refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
