@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Clock, Power, PowerOff, CalendarIcon } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
 import { LogsTable } from "@/components/LogsTable";
+import { LiveMachineStatus } from "@/components/LiveMachineStatus";
 import { useMachineLogs, calculateMetrics, formatDuration } from "@/hooks/useMachineLogs";
+import { useLiveMachineState } from "@/hooks/useLiveMachineState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -16,6 +18,7 @@ const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   
   const { data: allLogs = [], isLoading, error, refetch } = useMachineLogs(selectedMachine || undefined);
+  const { liveStates, isLoading: liveLoading } = useLiveMachineState(selectedMachine || undefined);
   
   // Filter logs by selected date
   const logs = allLogs.filter(log => {
@@ -91,6 +94,16 @@ const Index = () => {
               </Button>
             </div>
           </div>
+        </div>
+
+        {/* Live Machine Status */}
+        <div className="space-y-3 md:space-y-4">
+          <h2 className="text-xl md:text-2xl font-bold">Live Machine Status</h2>
+          {liveLoading ? (
+            <div className="text-center py-12 text-muted-foreground">Loading live status...</div>
+          ) : (
+            <LiveMachineStatus liveStates={liveStates} />
+          )}
         </div>
 
         {/* Metrics Grid */}
