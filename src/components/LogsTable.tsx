@@ -8,13 +8,14 @@ interface LogsTableProps {
 }
 
 export const LogsTable = ({ logs }: LogsTableProps) => {
-  const getEventBadgeVariant = (eventType: string) => {
+  const getEventBadgeVariant = (eventType: string): "success" | "warning" | "destructive" | "idle" | "outline" => {
     const type = eventType.toLowerCase();
-    if (type.includes('start') || type.includes('running')) return 'default';
-    if (type.includes('stop') || type.includes('idle')) return 'secondary';
+    if (type.includes('machine_on')) return 'success';
+    if (type.includes('running')) return 'warning';
+    if (type.includes('machine_off')) return 'destructive';
+    if (type.includes('idle')) return 'idle';
     if (type.includes('error') || type.includes('fault')) return 'destructive';
-    if (type.includes('warning')) return 'outline';
-    return 'secondary';
+    return 'outline';
   };
 
   return (
