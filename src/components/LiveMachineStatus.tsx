@@ -9,17 +9,13 @@ interface LiveMachineStatusProps {
 }
 
 export const LiveMachineStatus = ({ liveStates }: LiveMachineStatusProps) => {
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: string): "success" | "warning" | "destructive" | "secondary" | "outline" => {
     const statusLower = status.toLowerCase();
-    if (statusLower.includes('running')) return 'default';
-    if (statusLower.includes('idle')) return 'secondary';
+    if (statusLower.includes('on') && !statusLower.includes('disconnected')) return 'success';
+    if (statusLower.includes('running')) return 'warning';
     if (statusLower.includes('off') || statusLower.includes('disconnected')) return 'destructive';
+    if (statusLower.includes('idle')) return 'secondary';
     return 'outline';
-  };
-
-  const shouldShowSince = (status: string) => {
-    const statusLower = status.toLowerCase();
-    return statusLower.includes('running') || statusLower.includes('disconnected');
   };
 
   const getRelativeTime = (timestamp: string) => {
@@ -42,16 +38,9 @@ export const LiveMachineStatus = ({ liveStates }: LiveMachineStatusProps) => {
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
                 <h3 className="font-bold text-lg">Machine {machine.machine_id}</h3>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant={getStatusVariant(machine.status)} className="text-xs">
-                    {machine.status}
-                  </Badge>
-                  {shouldShowSince(machine.status) && (
-                    <span className="text-xs text-muted-foreground">
-                      since {getRelativeTime(machine.updated_at)}
-                    </span>
-                  )}
-                </div>
+                <Badge variant={getStatusVariant(machine.status)} className="text-xs">
+                  {machine.status}
+                </Badge>
               </div>
               <div className="p-2 rounded-lg bg-primary/10">
                 <Activity className="w-5 h-5 text-primary" />
